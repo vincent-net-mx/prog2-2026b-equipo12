@@ -93,3 +93,5 @@ classDiagram
     SistemaAccesos o-- Laboratorio : GESTIONA
     Persona --> Laboratorio : INGRESA A
     Persistencia ..> SistemaAccesos : USA
+
+## cambio Alex
