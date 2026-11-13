@@ -25,3 +25,71 @@ Por el momento, el repositorio solo contiene la documentación inicial del proye
 ## 4. ¿Qué produce?
 
 *Pendiente.* Una vez implementado, generará listados en consola sobre el personal registrado, la ocupación y bitácoras de los laboratorios, mensajes de validación ante intentos de acceso no autorizados y un archivo de datos local para persistir la información entre ejecuciones.
+
+## 5. Diagrama del Proyecto
+
+```mermaid
+classDiagram
+    direction TB
+
+    class SistemaAccesos {
+        -dict personas
+        -dict laboratorios
+        +registrar(objeto)
+        +agregar_laboratorio(laboratorio)
+        +asignar(identificador, clave)
+        +listar()
+    }
+
+    class Persistencia {
+        <<módulo>>
+        +guardar(sistema, ruta)
+        +cargar(sistema, ruta)
+    }
+
+    class Persona {
+        -str codigo
+        -str nombre
+        -int nivel_autorizacion
+        +describir() str
+        +a_diccionario() dict
+    }
+
+    class Laboratorio {
+        -str clave
+        -str nombre
+        -int cupo
+        -int nivel_minimo
+        -list ocupantes
+        -Bitacora bitacora
+        +admitir(persona)
+        +esta_lleno() bool
+        +listar_ocupantes()
+        +describir() str
+    }
+
+    class Investigador {
+        -str area_investigacion
+        +describir() str
+    }
+
+    class Becario {
+        -str carrera
+        -int semestre
+        +describir() str
+    }
+
+    class Bitacora {
+        -list eventos
+        +agregar(mensaje)
+        +listar()
+    }
+
+    %% Relaciones con etiquetas de palabras
+    Investigador --|> Persona : ES-UNA
+    Becario --|> Persona : ES-UNA
+    Laboratorio *-- Bitacora : TIENE-UNA
+    SistemaAccesos o-- Persona : GESTIONA
+    SistemaAccesos o-- Laboratorio : GESTIONA
+    Persona --> Laboratorio : INGRESA A
+    Persistencia ..> SistemaAccesos : USA
