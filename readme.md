@@ -94,5 +94,4 @@ classDiagram
     Persona --> Laboratorio : INGRESA A
     Persistencia ..> SistemaAccesos : USA
 
-Actualización Vicente
-## cambio Alex
+```
