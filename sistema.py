@@ -1,5 +1,5 @@
 from bitacora import Bitacora
-from excepciones import DatoInvalidoError, DuplicadoError
+from excepciones import DatoInvalidoError, DuplicadoError, ErrorAccesos, NoEncontradoError
 from modelo import Laboratorio, Persona
 
 
@@ -39,6 +39,21 @@ class SistemaAccesos:
         self._laboratorios[laboratorio.clave] = laboratorio
         self._bitacora.agregar(f"Agregado {laboratorio.describir()}")
 
+    def asignar(self, identificador, clave):
+        """Asigna una persona registrada a un laboratorio existente."""
+        codigo = str(identificador).strip()
+        clave = str(clave).strip().upper()
+        if codigo not in self._personas:
+            raise NoEncontradoError(f"El código {codigo} no está registrado, primero regístralo.")
+        if clave not in self._laboratorios:
+            raise NoEncontradoError(f"El laboratorio {clave} no está registrado.")
+        try:
+            self._laboratorios[clave].admitir(self._personas[codigo])
+        except ErrorAccesos as error:
+            self._bitacora.agregar(f"Rechazado {codigo} en {clave}: {error}")
+            raise
+        self._bitacora.agregar(f"Asignado {codigo} a {clave}")
+
     def listar(self):
         """Imprime cada registro pidiéndole que se describa."""
         registros = self.personas + self.laboratorios
@@ -46,3 +61,7 @@ class SistemaAccesos:
             print("No hay registros.")
         for registro in registros:
             print(registro.describir())
+
+    def ver_bitacora(self):
+        """Imprime los eventos de la bitácora."""
+        self._bitacora.listar()
