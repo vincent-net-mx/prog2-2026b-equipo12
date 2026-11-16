@@ -46,3 +46,41 @@ class Persona:
         """Regresa los datos comunes listos para guardarse."""
         return {"tipo": type(self).__name__, "codigo": self._codigo,
                 "nombre": self._nombre, "nivel": self._nivel}
+
+
+class Investigador(Persona):
+    """Representa a una persona investigadora con su área de investigación."""
+
+    def __init__(self, codigo, nombre, nivel, area):
+        super().__init__(codigo, nombre, nivel)
+        self._area = validar_texto(area, "área de investigación")
+
+    def describir(self):
+        """Agrega el área a la descripción común."""
+        return f"[Investigador] {super().describir()} | área: {self._area}"
+
+    def a_diccionario(self):
+        """Agrega el área a los datos comunes."""
+        datos = super().a_diccionario()
+        datos["area"] = self._area
+        return datos
+
+
+class Becario(Persona):
+    """Representa a una persona becaria junto con los datos de su carrera."""
+
+    def __init__(self, codigo, nombre, nivel, carrera, semestre):
+        super().__init__(codigo, nombre, nivel)
+        self._carrera = validar_texto(carrera, "carrera")
+        self._semestre = validar_entero(semestre, "semestre", 1, 12)
+
+    def describir(self):
+        """Agrega la carrera y el semestre a la descripción común."""
+        return f"[Becario] {super().describir()} | {self._carrera}, semestre {self._semestre}"
+
+    def a_diccionario(self):
+        """Agrega la carrera y el semestre a los datos comunes."""
+        datos = super().a_diccionario()
+        datos["carrera"] = self._carrera
+        datos["semestre"] = self._semestre
+        return datos
