@@ -1,6 +1,6 @@
 import re
 
-from excepciones import DatoInvalidoError
+from excepciones import AccesoDenegadoError, CupoLlenoError, DatoInvalidoError, DuplicadoError
 
 
 def validar_texto(valor, campo):
@@ -84,3 +84,47 @@ class Becario(Persona):
         datos["carrera"] = self._carrera
         datos["semestre"] = self._semestre
         return datos
+
+
+class Laboratorio:
+    """Controla quién entra a un laboratorio sin exceder su cupo ni su nivel mínimo."""
+
+    def __init__(self, clave, nombre, cupo, nivel_minimo):
+        self._clave = validar_texto(clave, "clave").upper()
+        self._nombre = validar_texto(nombre, "nombre del laboratorio")
+        self._cupo = validar_entero(cupo, "cupo", 1)
+        self._nivel_minimo = validar_entero(nivel_minimo, "nivel mínimo", 1, 3)
+        self._ocupantes = []
+
+    @property
+    def clave(self):
+        """Clave del laboratorio, solo lectura."""
+        return self._clave
+
+    def esta_lleno(self):
+        """Indica si ya no cabe nadie más."""
+        return len(self._ocupantes) >= self._cupo
+
+    def admitir(self, persona):
+        """Agrega a la persona si no está dentro, tiene el nivel y hay lugar."""
+        if persona in self._ocupantes:
+            raise DuplicadoError(f"La persona {persona.codigo} ya está asignada a {self._clave}.")
+        if persona.nivel < self._nivel_minimo:
+            raise AccesoDenegadoError(f"{self._clave} requiere nivel {self._nivel_minimo} "
+                                      f"y {persona.codigo} tiene nivel {persona.nivel}.")
+        if self.esta_lleno():
+            raise CupoLlenoError(f"{self._clave} ya alcanzó su cupo máximo de {self._cupo}.")
+        self._ocupantes.append(persona)
+
+    def describir(self):
+        """Regresa los datos del laboratorio y los códigos de quienes están dentro."""
+        ocupantes = ", ".join(persona.codigo for persona in self._ocupantes) or "sin ocupantes"
+        lugares = f"{len(self._ocupantes)}/{self._cupo}"
+        return (f"[Laboratorio] {self._clave} | {self._nombre} | {lugares}"
+                f" | nivel mínimo {self._nivel_minimo} | {ocupantes}")
+
+    def a_diccionario(self):
+        """Regresa los datos del laboratorio listos para guardarse."""
+        return {"clave": self._clave, "nombre": self._nombre, "cupo": self._cupo,
+                "nivel_minimo": self._nivel_minimo,
+                "ocupantes": [persona.codigo for persona in self._ocupantes]}
