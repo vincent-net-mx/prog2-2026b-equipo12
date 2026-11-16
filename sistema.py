@@ -1,3 +1,4 @@
+import persistencia
 from bitacora import Bitacora
 from excepciones import DatoInvalidoError, DuplicadoError, ErrorAccesos, NoEncontradoError
 from modelo import Laboratorio, Persona
@@ -65,3 +66,18 @@ class SistemaAccesos:
     def ver_bitacora(self):
         """Imprime los eventos de la bitácora."""
         self._bitacora.listar()
+
+    def vaciar(self):
+        """Borra todas las personas y laboratorios registrados."""
+        self._personas.clear()
+        self._laboratorios.clear()
+
+    @staticmethod
+    def guardar(sistema, ruta):
+        """Escribe el estado del sistema en el archivo indicado."""
+        persistencia.guardar(sistema, ruta)
+
+    @staticmethod
+    def cargar(sistema, ruta):
+        """Reconstruye el estado del sistema desde el archivo indicado."""
+        persistencia.cargar(sistema, ruta)
