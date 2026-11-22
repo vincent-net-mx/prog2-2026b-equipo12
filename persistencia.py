@@ -29,7 +29,7 @@ def cargar(sistema, ruta):
             sistema.registrar(TIPOS[persona.pop("tipo")](**persona))
         for laboratorio in datos["laboratorios"]:
             ocupantes = laboratorio.pop("ocupantes")
-            sistema.agregar_laboratorio(Laboratorio(**laboratorio))
+            sistema.registrar(Laboratorio(**laboratorio))
             for codigo in ocupantes:
                 sistema.asignar(codigo, laboratorio["clave"])
     except FileNotFoundError:

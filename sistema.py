@@ -23,22 +23,20 @@ class SistemaAccesos:
         return list(self._laboratorios.values())
 
     def registrar(self, objeto):
-        """Da de alta a un investigador o becario si su código no existe."""
-        if not isinstance(objeto, Persona):
-            raise DatoInvalidoError("Solo se pueden registrar investigadores o becarios.")
-        if objeto.codigo in self._personas:
-            raise DuplicadoError(f"El código {objeto.codigo} ya está registrado.")
-        self._personas[objeto.codigo] = objeto
-        self._bitacora.agregar(f"Registrado {objeto.describir()}")
-
-    def agregar_laboratorio(self, laboratorio):
-        """Da de alta un laboratorio si su clave no existe."""
-        if not isinstance(laboratorio, Laboratorio):
-            raise DatoInvalidoError("Solo se pueden agregar laboratorios.")
-        if laboratorio.clave in self._laboratorios:
-            raise DuplicadoError(f"La clave {laboratorio.clave} ya está registrada.")
-        self._laboratorios[laboratorio.clave] = laboratorio
-        self._bitacora.agregar(f"Agregado {laboratorio.describir()}")
+        """Da de alta una persona o un laboratorio si su identificador no existe."""
+        if isinstance(objeto, Laboratorio):
+            if objeto.clave in self._laboratorios:
+                raise DuplicadoError(f"La clave {objeto.clave} ya está registrada.")
+            self._laboratorios[objeto.clave] = objeto
+            self._bitacora.agregar(f"Agregado {objeto.describir()}")
+        elif isinstance(objeto, Persona):
+            if objeto.codigo in self._personas:
+                raise DuplicadoError(f"El código {objeto.codigo} ya está registrado.")
+            self._personas[objeto.codigo] = objeto
+            self._bitacora.agregar(f"Registrado {objeto.describir()}")
+        else:
+            raise DatoInvalidoError(
+                "Solo se pueden registrar investigadores, becarios o laboratorios.")
 
     def asignar(self, identificador, clave):
         """Asigna una persona registrada a un laboratorio existente."""

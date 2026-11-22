@@ -4,7 +4,7 @@ from sistema import SistemaAccesos
 RUTA = "datos.json"
 MENU = """
 1. Registrar persona
-2. Agregar laboratorio
+2. Registrar laboratorio
 3. Asignar persona a laboratorio
 4. Listar
 5. Ver bitácora
@@ -53,7 +53,7 @@ def main():
             if opcion == "1":
                 sistema.registrar(pedir_persona())
             elif opcion == "2":
-                sistema.agregar_laboratorio(pedir_laboratorio())
+                sistema.registrar(pedir_laboratorio())
             elif opcion == "3":
                 sistema.asignar(input("Código de la persona: "), input("Clave del laboratorio: "))
             elif opcion == "4":

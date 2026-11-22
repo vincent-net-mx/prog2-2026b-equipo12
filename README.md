@@ -27,7 +27,7 @@ sistema = SistemaAccesos()
 SistemaAccesos.cargar(sistema, "datos.json")
 sistema.registrar(Investigador("123456789", "Ana Ruiz", 3, "Análisis de malware"))
 sistema.registrar(Becario("987654321", "Luis Paz", 1, "Ciberseguridad", 3))
-sistema.agregar_laboratorio(Laboratorio("MAL-01", "Laboratorio de malware", 5, 2))
+sistema.registrar(Laboratorio("MAL-01", "Laboratorio de malware", 5, 2))
 sistema.asignar("123456789", "MAL-01")
 sistema.listar()
 SistemaAccesos.guardar(sistema, "datos.json")
@@ -42,7 +42,7 @@ SistemaAccesos.guardar(sistema, "datos.json")
 | `excepciones.py` | Errores propios del sistema, todos heredan de `ErrorAccesos` (que a su vez hereda de `ValueError`) |
 | `modelo.py` | Clases `Persona`, `Investigador`, `Becario` y `Laboratorio`, con sus validaciones |
 | `bitacora.py` | Clase `Bitacora`, el registro cronológico de eventos |
-| `sistema.py` | Clase `SistemaAccesos` con `registrar`, `asignar`, `listar`, `guardar` y `cargar` |
+| `sistema.py` | Clase `SistemaAccesos` con `registrar` (personas y laboratorios), `asignar`, `listar`, `guardar` y `cargar` |
 | `persistencia.py` | Escribe y lee el estado del sistema en formato JSON |
 | `main.py` | Menú de consola para probar el sistema |
 
@@ -51,14 +51,14 @@ SistemaAccesos.guardar(sistema, "datos.json")
 Todo rechazo lanza una excepción con un mensaje que dice qué estuvo mal:
 
 - Código vacío o que no tenga exactamente 9 dígitos, nombre vacío, nivel fuera de 1 a 3, área o carrera vacías, semestre fuera de 1 a 12.
-- Registrar algo que no sea una persona, o un código que ya existe.
+- Registrar algo que no sea una persona o un laboratorio, un código de persona que ya existe o una clave de laboratorio repetida.
 - Laboratorio con clave o nombre vacíos, cupo menor a 1, nivel mínimo fuera de 1 a 3 o clave repetida.
 - Asignar una persona no registrada, a un laboratorio que no existe, sin el nivel suficiente, a un laboratorio lleno o dos veces al mismo.
 - Cargar un archivo dañado: se avisa y el sistema queda vacío.
 
 ## Cambios respecto al hito 1
 
-Al programar nos dimos cuenta de que el proyecto pide que el sistema tenga la bitácora y le delegue el registro de lo que pasa, así que la `Bitacora` pasó de `Laboratorio` a `SistemaAccesos`; ahora también registra los intentos de asignación rechazados. `guardar` y `cargar` siguen en `persistencia.py`, pero `SistemaAccesos` también los tiene como métodos estáticos con los mismos parámetros para respetar el contrato. Se agregaron `vaciar()` y `ver_bitacora()` al sistema, propiedades de solo lectura (`codigo`, `nivel`, `clave`, `personas`, `laboratorios`) y `a_diccionario()` en `Laboratorio`. Se quitó `listar_ocupantes()` porque `describir()` ya muestra los ocupantes.
+`registrar` da de alta tanto personas como laboratorios, como pide el contrato; `agregar_laboratorio` quedó solo como atajo que llama a `registrar`. Al programar nos dimos cuenta de que el proyecto pide que el sistema tenga la bitácora y le delegue el registro de lo que pasa, así que la `Bitacora` pasó de `Laboratorio` a `SistemaAccesos`; ahora también registra los intentos de asignación rechazados. `guardar` y `cargar` siguen en `persistencia.py`, pero `SistemaAccesos` también los tiene como métodos estáticos con los mismos parámetros para respetar el contrato. Se agregaron `vaciar()` y `ver_bitacora()` al sistema, propiedades de solo lectura (`codigo`, `nivel`, `clave`, `personas`, `laboratorios`) y `a_diccionario()` en `Laboratorio`. Se quitó `listar_ocupantes()` porque `describir()` ya muestra los ocupantes.
 
 ## Diagrama
 
@@ -73,7 +73,7 @@ classDiagram
         +personas list
         +laboratorios list
         +registrar(objeto)
-        +agregar_laboratorio(laboratorio)
+        +agregar_laboratorio(laboratorio) atajo
         +asignar(identificador, clave)
         +listar()
         +ver_bitacora()
