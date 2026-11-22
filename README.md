@@ -58,7 +58,7 @@ Todo rechazo lanza una excepción con un mensaje que dice qué estuvo mal:
 
 ## Cambios respecto al hito 1
 
-`registrar` da de alta tanto personas como laboratorios, como pide el contrato; `agregar_laboratorio` quedó solo como atajo que llama a `registrar`. Al programar nos dimos cuenta de que el proyecto pide que el sistema tenga la bitácora y le delegue el registro de lo que pasa, así que la `Bitacora` pasó de `Laboratorio` a `SistemaAccesos`; ahora también registra los intentos de asignación rechazados. `guardar` y `cargar` siguen en `persistencia.py`, pero `SistemaAccesos` también los tiene como métodos estáticos con los mismos parámetros para respetar el contrato. Se agregaron `vaciar()` y `ver_bitacora()` al sistema, propiedades de solo lectura (`codigo`, `nivel`, `clave`, `personas`, `laboratorios`) y `a_diccionario()` en `Laboratorio`. Se quitó `listar_ocupantes()` porque `describir()` ya muestra los ocupantes.
+`registrar` da de alta tanto personas como laboratorios, como pide el contrato. Al programar nos dimos cuenta de que el proyecto pide que el sistema tenga la bitácora y le delegue el registro de lo que pasa, así que la `Bitacora` pasó de `Laboratorio` a `SistemaAccesos`; ahora también registra los intentos de asignación rechazados. `guardar` y `cargar` siguen en `persistencia.py`, pero `SistemaAccesos` también los tiene como métodos estáticos con los mismos parámetros para respetar el contrato. Se agregaron `vaciar()` y `ver_bitacora()` al sistema, propiedades de solo lectura (`codigo`, `nivel`, `clave`, `personas`, `laboratorios`) y `a_diccionario()` en `Laboratorio`. Se quitó `listar_ocupantes()` porque `describir()` ya muestra los ocupantes.
 
 ## Diagrama
 
@@ -73,7 +73,6 @@ classDiagram
         +personas list
         +laboratorios list
         +registrar(objeto)
-        +agregar_laboratorio(laboratorio) atajo
         +asignar(identificador, clave)
         +listar()
         +ver_bitacora()
