@@ -58,7 +58,17 @@ Todo rechazo lanza una excepción con un mensaje que dice qué estuvo mal:
 
 ## Cambios respecto al hito 1
 
-`registrar` da de alta tanto personas como laboratorios, como pide el contrato. Al programar nos dimos cuenta de que el proyecto pide que el sistema tenga la bitácora y le delegue el registro de lo que pasa, así que la `Bitacora` pasó de `Laboratorio` a `SistemaAccesos`; ahora también registra los intentos de asignación rechazados. `guardar` y `cargar` siguen en `persistencia.py`, pero `SistemaAccesos` también los tiene como métodos estáticos con los mismos parámetros para respetar el contrato. Se agregaron `vaciar()` y `ver_bitacora()` al sistema, propiedades de solo lectura (`codigo`, `nivel`, `clave`, `personas`, `laboratorios`) y `a_diccionario()` en `Laboratorio`. Se quitó `listar_ocupantes()` porque `describir()` ya muestra los ocupantes.
+Al programar nos dimos cuenta de que el proyecto pide que el sistema tenga la bitácora y le delegue el registro de lo que pasa, así que la `Bitacora` pasó de `Laboratorio` a `SistemaAccesos`; ahora también registra los intentos de asignación rechazados. `guardar` y `cargar` siguen en `persistencia.py`, pero `SistemaAccesos` también los tiene como métodos estáticos con los mismos parámetros para respetar el contrato. Se agregaron `vaciar()` y `ver_bitacora()` al sistema, propiedades de solo lectura (`codigo`, `nivel`, `clave`, `personas`, `laboratorios`) y `a_diccionario()` en `Laboratorio`. Se quitó `listar_ocupantes()` porque `describir()` ya muestra los ocupantes.
+
+## Correcciones respecto al hito 2
+
+La revisión del hito 2 señaló que `registrar()` rechazaba los laboratorios y que estos se daban de alta con otro método que no está en el contrato (`agregar_laboratorio`). Se corrigió así:
+
+- `registrar(objeto)` ahora acepta personas (`Investigador`, `Becario`) y también laboratorios (`Laboratorio`), como pide el contrato: un solo método para dar de alta cualquiera de los dos tipos de objeto.
+- Un laboratorio con una clave que ya existe se rechaza con `DuplicadoError`, igual que una persona con un código repetido. Cualquier otro tipo de objeto (por ejemplo `None` o un texto) se sigue rechazando con `DatoInvalidoError`. Cada alta de laboratorio también queda en la bitácora.
+- Se eliminó el método `agregar_laboratorio()`, que ya no hacía falta. El contrato vuelve a ser exactamente de cinco métodos: `registrar`, `asignar`, `listar`, `guardar` y `cargar`.
+- `cargar` en `persistencia.py` reconstruye los laboratorios con `registrar`, y la opción 2 del menú de `main.py` ahora se llama "Registrar laboratorio" y usa el mismo método.
+- Se actualizaron el ejemplo de uso, la lista de lo que se rechaza y el diagrama de este README para que coincidan con el código.
 
 ## Diagrama
 
