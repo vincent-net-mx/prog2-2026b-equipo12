@@ -45,6 +45,7 @@ SistemaAccesos.guardar(sistema, "datos.json")
 | `sistema.py` | Clase `SistemaAccesos` con `registrar` (personas y laboratorios), `asignar`, `listar`, `guardar` y `cargar` |
 | `persistencia.py` | Escribe y lee el estado del sistema en formato JSON |
 | `main.py` | Menú de consola para probar el sistema |
+| `tests/` | Suite de pruebas unitarias y de manejo de errores con `unittest` |
 
 ## ¿Qué rechaza?
 
@@ -69,6 +70,33 @@ La revisión del hito 2 señaló que `registrar()` rechazaba los laboratorios y 
 - Se eliminó el método `agregar_laboratorio()`, que ya no hacía falta. El contrato vuelve a ser exactamente de cinco métodos: `registrar`, `asignar`, `listar`, `guardar` y `cargar`.
 - `cargar` en `persistencia.py` reconstruye los laboratorios con `registrar`, y la opción 2 del menú de `main.py` ahora se llama "Registrar laboratorio" y usa el mismo método.
 - Se actualizaron el ejemplo de uso, la lista de lo que se rechaza y el diagrama de este README para que coincidan con el código.
+
+## Cambios para el hito 3
+
+A partir de una auditoría de calidad y seguridad sobre todos los módulos, se reforzaron validaciones, integridad de estado y manejo de errores:
+
+- **`modelo.py`:** `validar_texto()` ahora rechaza saltos de línea (`\n`, `\r`) para prevenir inyección de registros en la bitácora (CWE-117); se corrigió el mensaje de rango en `validar_entero()` cuando `maximo == 0`; `Persona` implementa `__eq__` y `__hash__` por `codigo` para evitar duplicados entre instancias distintas; y `Laboratorio.admitir()` valida que el argumento sea una `Persona` válida lanzando `DatoInvalidoError`.
+- **`bitacora.py`:** `agregar()` valida que el mensaje sea texto no vacío y neutraliza saltos de línea en una sola entrada; se añadió `limpiar()` para vaciar los eventos de forma encapsulada.
+- **`sistema.py`:** `registrar()` restringe el alta estrictamente a `Investigador`, `Becario` y `Laboratorio` (rechazando instancias base de `Persona` y laboratorios que ya incluyan ocupantes externos), y `vaciar()` ahora limpia también la bitácora para evitar eventos fantasma tras una carga fallida.
+- **`persistencia.py`:** `guardar()` realiza escritura atómica mediante archivo temporal y `os.replace()` (preservando el archivo previo ante fallos de escritura), valida el tipo de ruta y encapsula errores de `sistema` o rutas inválidas en `ArchivoInvalidoError`; `cargar()` valida estrictamente la estructura de listas (`personas`, `laboratorios` y `ocupantes`), protege `sistema.vaciar()` dentro del bloque `try` y restringe `TIPOS` a `Investigador` y `Becario`.
+- **`main.py`:** `pedir_persona()` valida inmediatamente que el tipo sea `1` o `2` antes de solicitar el resto de los campos, y `main()` solo guarda en `datos.json` tras operaciones de escritura (`1`, `2` y `3`), evitando sobrescribir un archivo dañado al listar, ver la bitácora o elegir una opción inválida.
+
+## Pruebas unitarias (`unittest`)
+
+Se implementó una suite de **111 pruebas unitarias y de manejo de errores** usando exclusivamente el módulo estándar `unittest` y `unittest.mock`, sin dependencias externas ni efectos secundarios sobre `datos.json` (se emplean directorios temporales y mocks para entradas de consola, fecha/hora y fallos de disco/permisos):
+
+- `tests/test_excepciones.py`: verifica la jerarquía de `ErrorAccesos` y la preservación de mensajes.
+- `tests/test_modelo.py`: valida tipos, rangos límite, encapsulamiento, igualdad por código, reglas de admisión y prioridad de errores en `Laboratorio`.
+- `tests/test_bitacora.py`: comprueba formato con marca de tiempo, orden cronológico, soporte Unicode y mitigación de inyección de logs.
+- `tests/test_sistema.py`: prueba altas, duplicados, asignaciones exitosas y rechazadas con auditoría en bitácora, vaciado completo y delegación a persistencia.
+- `tests/test_persistencia.py`: cubre ciclos guardar/cargar, escritura atómica, archivos inexistentes, vacíos, UTF-8 corrupto, esquemas malformados y errores simulados de permisos o escritura.
+- `tests/test_main.py`: prueba el menú interactivo y las funciones de lectura simulando `input`, `EOFError`, `KeyboardInterrupt` y archivos dañados al inicio.
+
+Para ejecutar la suite completa desde la raíz del proyecto:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
 
 ## Diagrama
 
@@ -101,6 +129,7 @@ classDiagram
         -list _eventos
         +agregar(mensaje)
         +listar()
+        +limpiar()
     }
 
     class Persona {
