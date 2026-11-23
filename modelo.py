@@ -7,13 +7,15 @@ def validar_texto(valor, campo):
     """Regresa el texto sin espacios en los extremos o lanza error si está vacío."""
     if not isinstance(valor, str) or not valor.strip():
         raise DatoInvalidoError(f"El campo '{campo}' es obligatorio y debe ser texto.")
+    if "\n" in valor or "\r" in valor:
+        raise DatoInvalidoError(f"El campo '{campo}' no puede contener saltos de línea.")
     return valor.strip()
 
 
 def validar_entero(valor, campo, minimo, maximo=None):
     """Regresa el entero si está dentro del rango o lanza error."""
     if type(valor) is not int or valor < minimo or (maximo is not None and valor > maximo):
-        rango = f"entre {minimo} y {maximo}" if maximo else f"mayor o igual a {minimo}"
+        rango = f"entre {minimo} y {maximo}" if maximo is not None else f"mayor o igual a {minimo}"
         raise DatoInvalidoError(f"El campo '{campo}' debe ser un número entero {rango}.")
     return valor
 
@@ -46,6 +48,14 @@ class Persona:
         """Regresa los datos comunes listos para guardarse."""
         return {"tipo": type(self).__name__, "codigo": self._codigo,
                 "nombre": self._nombre, "nivel": self._nivel}
+
+    def __eq__(self, otro):
+        if not isinstance(otro, Persona):
+            return NotImplemented
+        return self._codigo == otro._codigo
+
+    def __hash__(self):
+        return hash(self._codigo)
 
 
 class Investigador(Persona):
@@ -107,6 +117,8 @@ class Laboratorio:
 
     def admitir(self, persona):
         """Agrega a la persona si no está dentro, tiene el nivel y hay lugar."""
+        if not isinstance(persona, Persona):
+            raise DatoInvalidoError("Solo se pueden admitir personas válidas.")
         if persona in self._ocupantes:
             raise DuplicadoError(f"La persona {persona.codigo} ya está asignada a {self._clave}.")
         if persona.nivel < self._nivel_minimo:

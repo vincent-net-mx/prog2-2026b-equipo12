@@ -1,7 +1,7 @@
 import persistencia
 from bitacora import Bitacora
 from excepciones import DatoInvalidoError, DuplicadoError, ErrorAccesos, NoEncontradoError
-from modelo import Laboratorio, Persona
+from modelo import Becario, Investigador, Laboratorio
 
 
 class SistemaAccesos:
@@ -27,9 +27,13 @@ class SistemaAccesos:
         if isinstance(objeto, Laboratorio):
             if objeto.clave in self._laboratorios:
                 raise DuplicadoError(f"La clave {objeto.clave} ya está registrada.")
+            if objeto.a_diccionario()["ocupantes"]:
+                raise DatoInvalidoError(
+                    "No se puede registrar un laboratorio que ya tiene ocupantes asignados."
+                )
             self._laboratorios[objeto.clave] = objeto
             self._bitacora.agregar(f"Agregado {objeto.describir()}")
-        elif isinstance(objeto, Persona):
+        elif isinstance(objeto, (Investigador, Becario)):
             if objeto.codigo in self._personas:
                 raise DuplicadoError(f"El código {objeto.codigo} ya está registrado.")
             self._personas[objeto.codigo] = objeto
@@ -66,9 +70,10 @@ class SistemaAccesos:
         self._bitacora.listar()
 
     def vaciar(self):
-        """Borra todas las personas y laboratorios registrados."""
+        """Borra todas las personas, laboratorios y eventos registrados."""
         self._personas.clear()
         self._laboratorios.clear()
+        self._bitacora.limpiar()
 
     @staticmethod
     def guardar(sistema, ruta):
